@@ -27,5 +27,6 @@ public class MyLikeService {
         return myLikeRepository.findAllPostId(username);
     }
 
-
+    //좋아요 여부 확인
+    public boolean checkLikeServ(String postId, String username) {return  myLikeRepository.checkMyLike(postId, username);}
 }

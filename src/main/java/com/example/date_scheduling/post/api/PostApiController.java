@@ -233,12 +233,22 @@ public class PostApiController {
         return ResponseEntity.ok().body(flag);
     }
 
-    //좋아요한 게시글 조회
+    //좋아요한 게시글들 조회
     @GetMapping("/mylike")
     public FindAllPostDto myLikes(@AuthenticationPrincipal String username){
         log.info("/api/posts/mylike GET request!");
 
         return service.findAllMyLikesServ(username);
+    }
+
+    //좋아요 여부 조회
+    @GetMapping("/mylike/{postId}")
+    public ResponseEntity<?> checkLike(@PathVariable String postId, @AuthenticationPrincipal String username){
+        log.info("/api/posts/mylike/{} GET request to check Like!", postId);
+
+        boolean flag = myLikeService.checkLikeServ(postId, username);
+        return ResponseEntity.ok().body(flag);
+
     }
 
     //좋아요한 게시글 삭제

@@ -17,6 +17,12 @@
         WHERE username=#{username}
     </select>
 
+    <select id="checkMyLike" resultType="boolean">
+        SELECT count(*)
+        FROM tbl_mylike
+        WHERE postId=#{postId} AND username=#{username}
+    </select>
+
     <delete id="removeMyLike">
         DELETE FROM tbl_mylike
         WHERE postId IN
