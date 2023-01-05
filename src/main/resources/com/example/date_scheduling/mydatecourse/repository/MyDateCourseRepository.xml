@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.date_scheduling.mydatecourse.repository.MyDateCourseRepository">
+
+    <insert id="register">
+        INSERT INTO tbl_mydatecourse
+        (courseId, postId, username, meetingDate)
+        VALUES
+        (#{courseId}, #{postId}, #{username}, #{meetingDate})
+    </insert>
+
+    <delete id="remove">
+        DELETE FROM tbl_mydatecourse
+        WHERE courseId=#{courseId}
+    </delete>
+
+    <select id="findAll" resultType="com.example.date_scheduling.mydatecourse.entity.MyDateCourse">
+        SELECT courseId, postId, username, meetingDate, regDate
+        FROM tbl_mydatecourse
+        WHERE username=#{username} AND meetingDate=#{meetingDate}
+        ORDER BY meetingDate
+    </select>
+
+    <select id="findOne" resultType="com.example.date_scheduling.mydatecourse.entity.MyDateCourse">
+        SELECT courseId, postId, username, meetingDate, regDate
+        FROM tbl_mydatecourse
+        WHERE courseId=#{courseId}
+    </select>
+
+    <update id="modify">
+        UPDATE tbl_mydatecourse
+        SET postId=#{postId}, meetingDate=#{meetingDate}
+        WHERE courseId=#{courseId}
+    </update>
+
+</mapper>
