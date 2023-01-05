@@ -10,6 +10,7 @@ import com.example.date_scheduling.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -79,6 +80,16 @@ public class UserController {
     }
 
 
+    @PutMapping("/put")
+    public ResponseEntity<?> change(@RequestBody UserEntity entity, @AuthenticationPrincipal String username){
+
+        try {
+            UserEntity userEntity = userService.changeServ(entity);
+            return ResponseEntity.ok().body(userEntity);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+        }
+    }
 
 
 }

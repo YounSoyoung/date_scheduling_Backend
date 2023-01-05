@@ -42,4 +42,8 @@
         (#{uId}, #{username}, #{loginId}, #{email}, #{password})
     </insert>
 
+    <update id = "change">
+        update tbl_user set username = #{username}, password = #{password} where email = #{email}
+    </update>
+
 </mapper>

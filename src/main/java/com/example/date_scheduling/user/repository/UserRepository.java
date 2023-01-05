@@ -23,5 +23,7 @@ public interface UserRepository {
 
     //회원 가입하기
     boolean register(UserEntity entity);
+
+    boolean change(UserEntity entity);
 }
 

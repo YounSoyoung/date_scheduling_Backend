@@ -50,6 +50,17 @@ public class UserService {
         return user; //로그인 성공시 그 회원의 정보를 보여준다.
     }
 
+    //userentity를 입력받아 정보 바꿔주기
+    public UserEntity changeServ(UserEntity entity){
+        String rawPw = entity.getPassword();
+        entity.setPassword(encoder.encode(rawPw));
+        boolean flag = userRepository.change(entity);
+
+        if(!flag) throw new RuntimeException("잘 변경되지 않았습니다.");
+        return flag? getByEmail(entity.getEmail()) : null;
+
+    }
+
     //이메일 중복 검증
     public boolean emailDuplicate(String email){
         return userRepository.existByEmail(email);
