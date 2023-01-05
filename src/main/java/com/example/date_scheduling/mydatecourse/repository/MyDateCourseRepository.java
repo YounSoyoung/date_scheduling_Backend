@@ -14,6 +14,9 @@ public interface MyDateCourseRepository {
     // 상세 게시물 페이지에서 등록
     boolean register(MyDateCourse dateCourse);
 
+    //해당 날짜에 저장되어있는 postId들 조회
+    List<String> findAllPostId(String username, String meetingDate);
+
 
     ////// <마이 페이지> ///////
     // 전체 데이트 코스 목록 조회 기능

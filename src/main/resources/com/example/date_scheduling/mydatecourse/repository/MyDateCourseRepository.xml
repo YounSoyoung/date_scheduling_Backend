@@ -21,7 +21,12 @@
         SELECT courseId, postId, username, meetingDate, regDate
         FROM tbl_mydatecourse
         WHERE username=#{username} AND meetingDate=#{meetingDate}
-        ORDER BY meetingDate
+    </select>
+
+    <select id="findAllPostId" resultType="String">
+        SELECT postId
+        FROM tbl_mydatecourse
+        WHERE username=#{username} AND meetingDate=#{meetingDate}
     </select>
 
     <select id="findOne" resultType="com.example.date_scheduling.mydatecourse.entity.MyDateCourse">

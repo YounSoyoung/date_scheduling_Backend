@@ -4,6 +4,7 @@ import com.example.date_scheduling.mydatecourse.dto.FindAllCourseDto;
 import com.example.date_scheduling.mydatecourse.dto.MyCourseDto;
 import com.example.date_scheduling.mydatecourse.entity.MyDateCourse;
 import com.example.date_scheduling.mydatecourse.service.MyCourseService;
+import com.example.date_scheduling.post.dto.FindAllPostDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,18 @@ public class MyCourseApiController {
 
     // 데이트 코스 목록 전체 조회 요청
     // 캘린더에서 날짜를 클릭하면 해당 날짜의 데이트 목록만 조회됨
+//    @GetMapping("/mycourse/{meetingDate}")
+//    // 토큰 인증 필요
+//    public ResponseEntity<?> myCourseList(@AuthenticationPrincipal String username,@PathVariable String meetingDate) {
+//        log.info("/api/mycourses GET request!");
+//        return ResponseEntity.ok().body(service.findAllServ(username, meetingDate));
+//    }
+
     @GetMapping("/mycourse/{meetingDate}")
     // 토큰 인증 필요
     public ResponseEntity<?> myCourseList(@AuthenticationPrincipal String username,@PathVariable String meetingDate) {
         log.info("/api/mycourses GET request!");
-        return ResponseEntity.ok().body(service.findAllServ(username, meetingDate));
+        return ResponseEntity.ok().body(service.findAllPostIdServ(username, meetingDate));
     }
 
     // 데이트 코스 개별 조회 요청
@@ -52,7 +60,7 @@ public class MyCourseApiController {
         log.info("/api/mycourses POST request! - {}", newCourse);
 
         try {
-            FindAllCourseDto dto = service.createServ(newCourse);
+            FindAllPostDto dto = service.createServ(newCourse);
 
             if (dto == null) {
                 return ResponseEntity.notFound().build();
