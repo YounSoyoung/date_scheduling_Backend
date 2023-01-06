@@ -34,6 +34,9 @@ public interface PostRepository {
     // 내가 작성한 게시물 개별 조회
     Post findOneMyPost(String postId, String userId);
 
+    // 같은 카테고리를 가지고 있는 게시글 리스트(이미 검색한 게시글은 빼고 반환)
+    List<Post> findOtherReviews(String cID, String postId);
+
     // 게시물 삭제 기능
     boolean remove(String postId);
 

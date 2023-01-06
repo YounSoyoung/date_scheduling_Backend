@@ -124,6 +124,19 @@ public class PostApiController {
         return service.searchReviewsServ(category.getAddress());
 
     }
+
+    @PostMapping("/search/{postId}")
+    public FindAllPostDto searchOtherReviews(@RequestBody Category category, @PathVariable String postId){
+        log.info("/api/posts/search/{} GET request", category);
+
+        if(category.getArea() == null || category.getAddress() == null){
+            log.warn("{area} or {address} cannot be null");
+            throw new RuntimeException("{area} or {address} cannot be null!");
+        }
+
+        return service.searchOtherReviewsServ(category.getAddress(), postId);
+
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////
 
 

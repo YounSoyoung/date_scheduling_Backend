@@ -60,6 +60,19 @@ public class PostService {
     }
 
 
+    ///// 같은 카테고리를 가지고 있는 다른 리뷰들 보여주기
+    public FindAllPostDto findOtherReviewsServ(String cID, String postID){
+        return new FindAllPostDto(repository.findOtherReviews(cID, postID));
+    }
+
+    public FindAllPostDto searchOtherReviewsServ(String address, String postId){
+        Category category = categoryService.findCategoryServ(address);
+        String categoryId = category.getCID();
+
+        return findOtherReviewsServ(categoryId, postId);
+    }
+
+
     public RequestPostDto findOneServ(String postId) {
         Post post = repository.findOne(postId);
         log.info("findOneServ return data - {}", post);
