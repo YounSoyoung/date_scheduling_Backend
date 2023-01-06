@@ -2,6 +2,7 @@ package com.example.date_scheduling.mydatecourse.service;
 
 import com.example.date_scheduling.mydatecourse.dto.FindAllCourseDto;
 import com.example.date_scheduling.mydatecourse.dto.MyCourseDto;
+import com.example.date_scheduling.mydatecourse.dto.RequestDeleteDto;
 import com.example.date_scheduling.mydatecourse.entity.MyDateCourse;
 import com.example.date_scheduling.mydatecourse.repository.MyDateCourseRepository;
 import com.example.date_scheduling.post.dto.FindAllPostDto;
@@ -54,13 +55,23 @@ public class MyCourseService {
         }
 
 
-
         boolean flag = repository.register(newCourse);
         if (flag) log.info("새로운 데이트 코스 [courseId : {}]이 저장되었습니다.", newCourse.getCourseId());
 
 //        return flag ? findAllServ(newCourse.getUsername(), newCourse.getMeetingDate()) : null;
         return findAllPostIdServ(newCourse.getUsername(), newCourse.getMeetingDate());
 
+    }
+
+    public FindAllPostDto deleteServ(RequestDeleteDto deleteDto, String username) {
+        if (deleteDto == null) {
+            log.warn("newCourse cannot be null!");
+            throw new RuntimeException("newCourse cannot be null!");
+        }
+
+        boolean flag = repository.remove(deleteDto.getPostId(), deleteDto.getMeetingDate(), username);
+        if(!flag) log.info("{} 삭제 실패", deleteDto);
+        return findAllPostIdServ(username, deleteDto.getMeetingDate());
     }
     
     // 데이트 코스 개별 조회
@@ -72,20 +83,22 @@ public class MyCourseService {
         return myDateCourse != null ? myDateCourse : null;
     }
 
+
+
     // 데이트 코스 삭제
-    public FindAllCourseDto deleteServ(String courseId) {
-        MyDateCourse myDateCourse = findOneServ(courseId);
-
-        boolean flag = repository.remove(courseId);
-
-        // 삭제 실패한 경우
-        if(!flag) {
-            log.warn("delete fail! not found courseId [{}]", courseId);
-            throw new RuntimeException("delete fail!");
-        }
-
-        return findAllServ(myDateCourse.getUsername(), myDateCourse.getMeetingDate());
-    }
+//    public FindAllCourseDto deleteServ(String courseId) {
+//        MyDateCourse myDateCourse = findOneServ(courseId);
+//
+//        boolean flag = repository.remove(courseId);
+//
+//        // 삭제 실패한 경우
+//        if(!flag) {
+//            log.warn("delete fail! not found courseId [{}]", courseId);
+//            throw new RuntimeException("delete fail!");
+//        }
+//
+//        return findAllServ(myDateCourse.getUsername(), myDateCourse.getMeetingDate());
+//    }
 
     // 데이트 코스 수정
 //    public FindAllCourseDto update(MyDateCourse dateCourse) {

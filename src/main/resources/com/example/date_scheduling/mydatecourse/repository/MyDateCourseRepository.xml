@@ -13,8 +13,11 @@
     </insert>
 
     <delete id="remove">
-        DELETE FROM tbl_mydatecourse
-        WHERE courseId=#{courseId}
+        delete from tbl_mydatecourse
+        where courseId in
+        (select courseId from tbl_mydatecourse
+        where username=#{username} and meetingDate=#{meetingDate}
+        group by postId having postId=#{postId})
     </delete>
 
     <select id="findAll" resultType="com.example.date_scheduling.mydatecourse.entity.MyDateCourse">

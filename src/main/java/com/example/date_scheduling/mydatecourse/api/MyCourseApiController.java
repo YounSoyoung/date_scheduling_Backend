@@ -2,6 +2,7 @@ package com.example.date_scheduling.mydatecourse.api;
 
 import com.example.date_scheduling.mydatecourse.dto.FindAllCourseDto;
 import com.example.date_scheduling.mydatecourse.dto.MyCourseDto;
+import com.example.date_scheduling.mydatecourse.dto.RequestDeleteDto;
 import com.example.date_scheduling.mydatecourse.entity.MyDateCourse;
 import com.example.date_scheduling.mydatecourse.service.MyCourseService;
 import com.example.date_scheduling.post.dto.FindAllPostDto;
@@ -86,13 +87,14 @@ public class MyCourseApiController {
 //    }
 
     // 데이트 코스 삭제 요청
-    @DeleteMapping("/{courseId}")
-    public ResponseEntity<?> deleteCourse (@PathVariable String courseId) {
+    @DeleteMapping
+    public ResponseEntity<?> deleteCourse (@RequestBody RequestDeleteDto deleteDto, @AuthenticationPrincipal String username) {
 
-        log. info("/api/mycourses/{} DELETE request!", courseId);
+
+        log. info("/api/mycourses DELETE postId - {}", deleteDto);
 
         try {
-            FindAllCourseDto dtos = service.deleteServ(courseId);
+            FindAllPostDto dtos = service.deleteServ(deleteDto, username);
             return ResponseEntity.ok().body(dtos);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
