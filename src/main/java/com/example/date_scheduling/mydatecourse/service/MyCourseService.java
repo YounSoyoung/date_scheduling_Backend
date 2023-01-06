@@ -26,10 +26,10 @@ public class MyCourseService {
     private final PostRepository postRepository;
 
 
-    public FindAllCourseDto findAllServ(String username, String meetingDate) {
+    public List<MyDateCourse> findAllServ(String username, String meetingDate) {
         log.info("username: {} / meetingDate: {}", username, meetingDate);
 
-        return new FindAllCourseDto(repository.findAll(username, meetingDate));
+        return repository.findAll(username, meetingDate);
     }
 
     public FindAllPostDto findAllPostIdServ(String username, String meetingDate){
@@ -63,15 +63,23 @@ public class MyCourseService {
 
     }
 
-    public FindAllPostDto deleteServ(RequestDeleteDto deleteDto, String username) {
+    public FindAllPostDto deleteServ(MyDateCourse deleteDto) {
         if (deleteDto == null) {
             log.warn("newCourse cannot be null!");
             throw new RuntimeException("newCourse cannot be null!");
         }
 
-        boolean flag = repository.remove(deleteDto.getPostId(), deleteDto.getMeetingDate(), username);
-        if(!flag) log.info("{} 삭제 실패", deleteDto);
-        return findAllPostIdServ(username, deleteDto.getMeetingDate());
+        List<MyDateCourse> courseList = findAllServ(deleteDto.getUsername(), deleteDto.getMeetingDate());
+
+        for(MyDateCourse course : courseList){
+           if(course.getPostId().equals(deleteDto.getPostId())){
+               String courseId = course.getCourseId();
+               repository.remove(courseId);
+           }
+        }
+
+        return findAllPostIdServ(deleteDto.getUsername(), deleteDto.getMeetingDate());
+
     }
     
     // 데이트 코스 개별 조회

@@ -88,13 +88,13 @@ public class MyCourseApiController {
 
     // 데이트 코스 삭제 요청
     @DeleteMapping
-    public ResponseEntity<?> deleteCourse (@RequestBody RequestDeleteDto deleteDto, @AuthenticationPrincipal String username) {
+    public ResponseEntity<?> deleteCourse (@RequestBody MyDateCourse deleteDto, @AuthenticationPrincipal String username) {
 
-
+        deleteDto.setUsername(username);
         log. info("/api/mycourses DELETE postId - {}", deleteDto);
 
         try {
-            FindAllPostDto dtos = service.deleteServ(deleteDto, username);
+            FindAllPostDto dtos = service.deleteServ(deleteDto);
             return ResponseEntity.ok().body(dtos);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

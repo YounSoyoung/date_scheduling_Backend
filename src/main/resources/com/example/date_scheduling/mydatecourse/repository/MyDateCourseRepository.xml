@@ -12,12 +12,17 @@
         (#{courseId}, #{postId}, #{username}, #{meetingDate})
     </insert>
 
+<!--    <delete id="remove">-->
+<!--        delete from tbl_mydatecourse-->
+<!--        where courseId in-->
+<!--        (select courseId from tbl_mydatecourse-->
+<!--        where username=#{username} and meetingDate=#{meetingDate}-->
+<!--        group by postId having postId=#{postId})-->
+<!--    </delete>-->
+
     <delete id="remove">
         delete from tbl_mydatecourse
-        where courseId in
-        (select courseId from tbl_mydatecourse
-        where username=#{username} and meetingDate=#{meetingDate}
-        group by postId having postId=#{postId})
+        where courseId=#{courseId}
     </delete>
 
     <select id="findAll" resultType="com.example.date_scheduling.mydatecourse.entity.MyDateCourse">

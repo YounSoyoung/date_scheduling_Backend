@@ -29,5 +29,5 @@ public interface MyDateCourseRepository {
     boolean modify(MyDateCourse dateCourse);
 
     // 데이트 코스 삭제 기능
-    boolean remove(String postId, String username, String meetingDate);
+    boolean remove(String courseId);
 }
