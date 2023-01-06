@@ -53,6 +53,8 @@ public class MyCourseService {
             throw new RuntimeException("newCourse cannot be null!");
         }
 
+
+
         boolean flag = repository.register(newCourse);
         if (flag) log.info("새로운 데이트 코스 [courseId : {}]이 저장되었습니다.", newCourse.getCourseId());
 

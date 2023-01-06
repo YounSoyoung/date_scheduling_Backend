@@ -82,7 +82,7 @@ public class UserController {
 
     @PutMapping("/put")
     public ResponseEntity<?> change(@RequestBody UserEntity entity, @AuthenticationPrincipal String username){
-
+        log.info("유저 정보 수정 요청! - {}", entity);
         try {
             UserEntity userEntity = userService.changeServ(entity);
             return ResponseEntity.ok().body(userEntity);

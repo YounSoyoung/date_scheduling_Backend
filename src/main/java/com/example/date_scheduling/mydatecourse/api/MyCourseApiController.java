@@ -35,7 +35,7 @@ public class MyCourseApiController {
     // 토큰 인증 필요
     public ResponseEntity<?> myCourseList(@AuthenticationPrincipal String username,@PathVariable String meetingDate) {
         log.info("/api/mycourses GET request!");
-        return ResponseEntity.ok().body(service.findAllPostIdServ(username, meetingDate));
+        return ResponseEntity.ok().body(service.findAllPostIdServ   (username, meetingDate));
     }
 
     // 데이트 코스 개별 조회 요청
