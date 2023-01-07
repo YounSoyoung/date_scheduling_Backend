@@ -10,14 +10,20 @@ import com.example.date_scheduling.post.entity.Post;
 import com.example.date_scheduling.post.service.CategoryService;
 import com.example.date_scheduling.post.service.MyLikeService;
 import com.example.date_scheduling.post.service.PostService;
+import com.example.date_scheduling.util.FileUploadUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Slf4j  // 로깅을 위해
@@ -29,6 +35,9 @@ public class PostApiController {
     private final PostService service;
     private final CategoryService categoryService;
     private final MyLikeService myLikeService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
 
     //메인페이지에서 보여줄 리뷰 목록과 마이페이지에서 보여줄 리뷰 목록 나누기
     // 게시물 목록 전체 조회 요청
@@ -71,9 +80,11 @@ public class PostApiController {
 
     //리뷰 등록 요청
     @PostMapping(value = "/new")
-    public ResponseEntity<?> create(@AuthenticationPrincipal String username, @RequestBody RequestPostDto requestPostDto){
+    public ResponseEntity<?> create(@AuthenticationPrincipal String username,
+                                    @RequestPart("postInfo") RequestPostDto requestPostDto,
+                                    @RequestPart(value = "postImg", required = false) MultipartFile postImg) throws IOException {
 
-        log.info("/api/posts/new POST request!", requestPostDto);
+
 
         Post newPost = requestPostDto.getPost();
         Category category = requestPostDto.getCategory();
@@ -82,6 +93,37 @@ public class PostApiController {
         log.info("/api/reviews POST request! - {}", newPost);
 
         try{
+            if(postImg!=null){
+                log.info("postImg: {}", postImg.getOriginalFilename());
+
+                //1. 서버에 이미지를 저장 - 이미지를 서버에 업로드
+
+                //1-a. 파일 저장 위치를 지정하여 파일 객체에 포장
+                String originalFilename = postImg.getOriginalFilename();
+
+                //1-a-1. 파일명이 중복되지 않도록 변경
+                String uploadFileName = UUID.randomUUID() + "_" + originalFilename;
+
+                //1-a-2. 업로드 폴더를 날짜별로 생성
+                String newUploadPath = FileUploadUtil.makeUploadDirectory(uploadRootPath);
+
+                File uploadFile = new File(newUploadPath + "/" + uploadFileName);
+
+                //1-b. 파일을 해당 경로에 업로드
+                postImg.transferTo(uploadFile);
+
+
+                //2. 데이터베이스에 이미지 정보를 저장 - 누가 어떤 사진을 올렸는가
+
+                //2-a. newUploadPath에서 rootPath를 제거
+                //ex) new: D:/upload/2023/01/07
+                // root: D:/upload
+                // new - root == /2023/01/07
+                String savePath = newUploadPath.substring(uploadRootPath.length());
+
+                newPost.setImage(savePath + File.separator + uploadFileName);
+            }
+
             FindAllPostDto dto = service.createServ(newPost, category.getAddress());
 
             if(dto == null){
@@ -91,6 +133,7 @@ public class PostApiController {
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body((e.getMessage()));
         }
+
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
