@@ -41,4 +41,13 @@
         WHERE courseId=#{courseId}
     </update>
 
+<!--    수정한 쿼리문-->
+    <select id="findAllMyCourse" resultType="com.example.date_scheduling.mydatecourse.entity.ResponseCourse">
+        SELECT m.courseId AS courseId, m.postId AS postId, p.title AS title
+        FROM tbl_mydatecourse m
+        INNER JOIN tbl_post p
+        ON m.postId = p.postId
+        WHERE m.meetingDate=#{meetingDate} and m.username=#{username}
+    </select>
+
 </mapper>

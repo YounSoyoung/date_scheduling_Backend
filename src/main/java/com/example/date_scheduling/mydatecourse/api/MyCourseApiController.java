@@ -3,6 +3,7 @@ package com.example.date_scheduling.mydatecourse.api;
 import com.example.date_scheduling.mydatecourse.dto.FindAllCourseDto;
 import com.example.date_scheduling.mydatecourse.dto.MyCourseDto;
 import com.example.date_scheduling.mydatecourse.dto.RequestDeleteDto;
+import com.example.date_scheduling.mydatecourse.dto.ResponseCourseDTO;
 import com.example.date_scheduling.mydatecourse.entity.MyDateCourse;
 import com.example.date_scheduling.mydatecourse.service.MyCourseService;
 import com.example.date_scheduling.post.dto.FindAllPostDto;
@@ -32,12 +33,13 @@ public class MyCourseApiController {
 //        return ResponseEntity.ok().body(service.findAllServ(username, meetingDate));
 //    }
 
-    @GetMapping("/mycourse/{meetingDate}")
-    // 토큰 인증 필요
-    public ResponseEntity<?> myCourseList(@AuthenticationPrincipal String username,@PathVariable String meetingDate) {
-        log.info("/api/mycourses GET request!");
-        return ResponseEntity.ok().body(service.findAllPostIdServ   (username, meetingDate));
-    }
+//    @GetMapping("/mycourse/{meetingDate}")
+//    // 토큰 인증 필요
+//    public ResponseEntity<?> myCourseList(@AuthenticationPrincipal String username,@PathVariable String meetingDate) {
+//        log.info("/api/mycourses GET request!");
+//        return ResponseEntity.ok().body(service.findAllPostIdServ   (username, meetingDate));
+//    }
+
 
     // 데이트 코스 개별 조회 요청
     @GetMapping("/{courseId}")
@@ -61,7 +63,7 @@ public class MyCourseApiController {
         log.info("/api/mycourses POST request! - {}", newCourse);
 
         try {
-            FindAllPostDto dto = service.createServ(newCourse);
+            ResponseCourseDTO dto = service.createServ(newCourse);
 
             if (dto == null) {
                 return ResponseEntity.notFound().build();
@@ -87,17 +89,25 @@ public class MyCourseApiController {
 //    }
 
     // 데이트 코스 삭제 요청
-    @DeleteMapping
-    public ResponseEntity<?> deleteCourse (@RequestBody MyDateCourse deleteDto, @AuthenticationPrincipal String username) {
+    @DeleteMapping("/{courseId}")
+    public ResponseEntity<?> deleteCourse(@RequestBody MyDateCourse deleteCourse, @PathVariable String courseId, @AuthenticationPrincipal String username) {
 
-        deleteDto.setUsername(username);
-        log. info("/api/mycourses DELETE postId - {}", deleteDto);
+        deleteCourse.setCourseId(courseId);
+        log. info("/api/mycourses DELETE - {}", deleteCourse);
 
         try {
-            FindAllPostDto dtos = service.deleteServ(deleteDto);
+            ResponseCourseDTO dtos = service.deleteServ(deleteCourse, username);
             return ResponseEntity.ok().body(dtos);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    ///////////////////////////////////////////////////////////////
+    //날짜에 해당하는 저장된 일정들 보여주기
+    @GetMapping("/mycourse/{meetingDate}")
+    public ResponseCourseDTO myCourseList(@AuthenticationPrincipal String username, @PathVariable String meetingDate) {
+        log.info("/api/mycourses/{} GET request!", meetingDate);
+        return service.findAllMyCourseServ(username, meetingDate);
     }
 }

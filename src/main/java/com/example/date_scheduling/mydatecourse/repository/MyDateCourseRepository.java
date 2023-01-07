@@ -1,6 +1,8 @@
 package com.example.date_scheduling.mydatecourse.repository;
 
+import com.example.date_scheduling.mydatecourse.dto.ResponseCourseDTO;
 import com.example.date_scheduling.mydatecourse.entity.MyDateCourse;
+import com.example.date_scheduling.mydatecourse.entity.ResponseCourse;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Date;
@@ -30,4 +32,8 @@ public interface MyDateCourseRepository {
 
     // 데이트 코스 삭제 기능
     boolean remove(String courseId);
+
+    /////////////////////////////////////////
+    //날짜별 데이트 코스 전체 조회
+    List<ResponseCourse> findAllMyCourse(String meetingDate, String username);
 }
