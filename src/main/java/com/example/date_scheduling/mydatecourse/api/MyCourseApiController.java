@@ -42,18 +42,18 @@ public class MyCourseApiController {
 
 
     // 데이트 코스 개별 조회 요청
-    @GetMapping("/{courseId}")
-    public ResponseEntity<?> findOneCourse(@PathVariable String courseId) {
-        log.info("/api/mycourses GET request!", courseId);
-
-        // 해당 날짜에 데이트 코스가 없을 경우
-        if (courseId == null) return ResponseEntity.badRequest().build();
-
-        MyCourseDto dto = new MyCourseDto(service.findOneServ(courseId));
-
-        if (dto == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok().body(dto);
-    }
+//    @GetMapping("/{courseId}")
+//    public ResponseEntity<?> findOneCourse(@PathVariable String courseId) {
+//        log.info("/api/mycourses GET request!", courseId);
+//
+//        // 해당 날짜에 데이트 코스가 없을 경우
+//        if (courseId == null) return ResponseEntity.badRequest().build();
+//
+//        MyCourseDto dto = new MyCourseDto(service.findOneServ(courseId));
+//
+//        if (dto == null) return ResponseEntity.notFound().build();
+//        return ResponseEntity.ok().body(dto);
+//    }
 
     // 데이트 코스 등록 요청
     @PostMapping
@@ -88,7 +88,7 @@ public class MyCourseApiController {
 //        }
 //    }
 
-    // 데이트 코스 삭제 요청
+//    // 데이트 코스 삭제 요청
     @DeleteMapping("/{courseId}")
     public ResponseEntity<?> deleteCourse(@RequestBody MyDateCourse deleteCourse, @PathVariable String courseId, @AuthenticationPrincipal String username) {
 
@@ -110,4 +110,27 @@ public class MyCourseApiController {
         log.info("/api/mycourses/{} GET request!", meetingDate);
         return service.findAllMyCourseServ(username, meetingDate);
     }
+
+    //이미 등록된 일정인지 확인
+    @PostMapping("/check")
+    public ResponseEntity<?> checkPostId(@RequestBody MyDateCourse myDateCourse, @AuthenticationPrincipal String username){
+        boolean flag = service.checkDuplicateServ(myDateCourse, username);
+        log.info("{} 중복여부?? - {}", myDateCourse.getPostId(), flag);
+        return ResponseEntity.ok().body(flag);
+
+    }
+
+    // 데이트 코스 삭제 요청
+//    @DeleteMapping("/{courseId}")
+//    public ResponseEntity<?> deleteCourse(@PathVariable String courseId, @AuthenticationPrincipal String username) {
+//
+//        log. info("/api/mycourses DELETE - {}", courseId);
+//
+//        try {
+//            boolean flag = service.deleteServ(courseId, username);
+//            return ResponseEntity.ok().body(flag);
+//        } catch (Exception e) {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }

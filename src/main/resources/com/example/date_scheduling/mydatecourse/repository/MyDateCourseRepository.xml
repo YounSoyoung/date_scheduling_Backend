@@ -50,4 +50,9 @@
         WHERE m.meetingDate=#{meetingDate} and m.username=#{username}
     </select>
 
+    <select id="checkCourse" resultType="boolean">
+        SELECT COUNT(*) FROM tbl_mydatecourse
+        WHERE meetingDate=#{meetingDate} AND username=#{username} AND postId=#{postId}
+    </select>
+
 </mapper>

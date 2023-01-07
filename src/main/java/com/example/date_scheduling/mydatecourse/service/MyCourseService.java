@@ -96,4 +96,26 @@ public class MyCourseService {
         return new ResponseCourseDTO(repository.findAllMyCourse(username, meetingDate));
     }
 
+    //postId 중복 확인
+    public boolean checkDuplicateServ(MyDateCourse myDateCourse, String username){
+        boolean flag = repository.checkCourse(myDateCourse.getMeetingDate(), username, myDateCourse.getPostId());
+        log.info("postId 중복 검사 결과 - {}", flag);
+        return flag;
+//        return false;
+    }
+
+//    public boolean deleteServ(String courseId, String username) {
+//        if (courseId == null) {
+//            log.warn("courseId cannot be null!");
+//            throw new RuntimeException("courseId cannot be null!");
+//        }
+//
+//        log.info("{} 작성된 일정 삭제 - username: {}", courseId, username);
+//
+//        boolean flag = repository.remove(courseId);
+//        log.info("삭제 성공 여부: {}", flag);
+//
+//        return flag;
+//    }
+
 }

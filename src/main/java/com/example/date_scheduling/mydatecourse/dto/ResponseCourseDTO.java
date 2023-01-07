@@ -14,11 +14,11 @@ import java.util.List;
 public class ResponseCourseDTO {
 
     private int count;  // 전체 데이트 코스 목록 갯수
-    private List<ResponseCourse> myResponseCourseDtos;
+    private List<ResponseCourse> responseCourses;
 
     public ResponseCourseDTO(List<ResponseCourse> courseList) {
         this.count = courseList.size();
-        this.myResponseCourseDtos = courseList;
+        this.responseCourses = courseList;
     }
 
 

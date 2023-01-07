@@ -36,4 +36,7 @@ public interface MyDateCourseRepository {
     /////////////////////////////////////////
     //날짜별 데이트 코스 전체 조회
     List<ResponseCourse> findAllMyCourse(String meetingDate, String username);
+
+    //postId 중복 확인
+    boolean checkCourse(String meetingDate, String username, String postId);
 }
