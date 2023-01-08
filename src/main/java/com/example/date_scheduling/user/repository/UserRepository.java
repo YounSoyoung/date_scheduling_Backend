@@ -25,5 +25,7 @@ public interface UserRepository {
     boolean register(UserEntity entity);
 
     boolean change(UserEntity entity);
-}
 
+    //회원의 프로필 사진 경로 조회
+    String findProfile(String username);
+}

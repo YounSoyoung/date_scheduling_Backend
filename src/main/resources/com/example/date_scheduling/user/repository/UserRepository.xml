@@ -6,7 +6,7 @@
 <mapper namespace="com.example.date_scheduling.user.repository.UserRepository">
 
     <select id="findUserByLoginId" resultType="com.example.date_scheduling.user.entity.UserEntity">
-        SELECT uId, username, loginId, email, password
+        SELECT uId, username, loginId, email, password, profileImg
         from tbl_user
         where loginId = #{loginId}
     </select>
@@ -18,7 +18,7 @@
     </select>
 
     <select id = "findUserByEmail" resultType="com.example.date_scheduling.user.entity.UserEntity">
-        select uId, username, loginId, email, password
+        select uId, username, loginId, email, password, profileImg
         from tbl_user
         where email = #{email}
     </select>
@@ -37,13 +37,16 @@
 
     <insert id = "register">
         insert into tbl_user
-        (uId, username, loginId, email, password)
+        (uId, username, loginId, email, password, profileImg)
         values
-        (#{uId}, #{username}, #{loginId}, #{email}, #{password})
+        (#{uId}, #{username}, #{loginId}, #{email}, #{password},#{profileImg})
     </insert>
 
     <update id = "change">
-        update tbl_user set username = #{username}, password = #{password} where email = #{email}
+        update tbl_user set password = #{password} where email = #{email}
     </update>
 
+    <select id = "findProfile" resultType="String">
+        select profileImg from tbl_user where username = #{username}
+    </select>
 </mapper>

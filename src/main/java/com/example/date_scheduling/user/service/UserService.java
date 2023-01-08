@@ -61,6 +61,13 @@ public class UserService {
 
     }
 
+    //프로필 찾기
+    public String getProfilePath(String username){
+        String profile = userRepository.findProfile(username);
+        log.info("find profile path - {}",profile);
+        return profile;
+    }
+
     //이메일 중복 검증
     public boolean emailDuplicate(String email){
         return userRepository.existByEmail(email);
@@ -73,4 +80,3 @@ public class UserService {
     public boolean usernameDuplicate(String username) {return userRepository.existByUsername(username); }
 
 }
-
