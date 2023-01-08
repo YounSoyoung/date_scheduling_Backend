@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@Slf4j  // 로깅을 위해
+@Slf4j  // 로깅을 위해//////////////푸시테스트
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 @CrossOrigin    // 다른 서버의 요청 허용
