@@ -21,10 +21,6 @@ public class CategoryService {
         return new CategoryDto(categoryRepository.findAreaList());
     }
 
-    //선택한 지역 또는 주소 보여주기
-    public Category showAreaServ(String area){
-        return categoryRepository.showArea(area);
-    }
 
     //지역에 해당하는 주소 목록 조회 중간처리
     public CategoryDto findAddressServ(String area){

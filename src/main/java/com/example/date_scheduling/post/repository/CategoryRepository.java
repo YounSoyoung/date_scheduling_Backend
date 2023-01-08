@@ -13,8 +13,6 @@ public interface CategoryRepository {
     //지역들을 보여주는 기능
     List<Category> findAreaList();
 
-    Category showArea(String area);
-
     //지역을 선택했을 때 해당하는 구를 보여주는 기능
     List<Category> findAddressList(String area);
 

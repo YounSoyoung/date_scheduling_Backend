@@ -240,8 +240,10 @@ public class PostApiController {
 
     // 게시물 수정 요청
     @PutMapping("/mypost/{postId}")
-    public ResponseEntity<?> update(@RequestBody RequestPostDto requestPostDto, @PathVariable String postId, @AuthenticationPrincipal String username) {
-//        post.setUserId(username);
+    public ResponseEntity<?> update(@RequestPart("updateInfo") RequestPostDto requestPostDto,
+                                    @RequestPart(value = "updateImg", required = false) MultipartFile updateImg,
+                                    @PathVariable String postId,
+                                    @AuthenticationPrincipal String username) throws IOException {
 
         String nickByPostId = service.findOneMyPostServ(postId, username).getPost().getUserId();
         if(!nickByPostId.equalsIgnoreCase(requestPostDto.getPost().getUserId())) return ResponseEntity.badRequest().body(new ErrorDTO("접근권한이 없습니다-username 불일치"));
@@ -252,6 +254,36 @@ public class PostApiController {
         log.info("/api/posts PUT request! Post-{} / Category-{}", modifyPost, modifyCategory);
 
         try {
+            if(updateImg!=null){
+                log.info("updateImg: {}", updateImg.getOriginalFilename());
+
+                //1. 서버에 이미지를 저장 - 이미지를 서버에 업로드
+
+                //1-a. 파일 저장 위치를 지정하여 파일 객체에 포장
+                String originalFilename = updateImg.getOriginalFilename();
+
+                //1-a-1. 파일명이 중복되지 않도록 변경
+                String uploadFileName = UUID.randomUUID() + "_" + originalFilename;
+
+                //1-a-2. 업로드 폴더를 날짜별로 생성
+                String newUploadPath = FileUploadUtil.makeUploadDirectory(uploadRootPath);
+
+                File uploadFile = new File(newUploadPath + "/" + uploadFileName);
+
+                //1-b. 파일을 해당 경로에 업로드
+                updateImg.transferTo(uploadFile);
+
+
+                //2. 데이터베이스에 이미지 정보를 저장 - 누가 어떤 사진을 올렸는가
+
+                //2-a. newUploadPath에서 rootPath를 제거
+                //ex) new: D:/upload/2023/01/07
+                // root: D:/upload
+                // new - root == /2023/01/07
+                String savePath = newUploadPath.substring(uploadRootPath.length());
+
+                modifyPost.setImage(savePath + File.separator + uploadFileName);
+            }
 
             FindAllPostDto dtos = service.update(modifyPost, modifyCategory.getAddress());
             return ResponseEntity.ok().body(dtos);

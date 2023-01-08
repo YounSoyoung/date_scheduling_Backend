@@ -8,14 +8,9 @@
         SELECT area
         FROM tbl_category
         GROUP BY area
+        ORDER BY area DESC
     </select>
 
-    <select id="showArea" resultType="com.example.date_scheduling.post.entity.Category">
-        SELECT area
-        FROM tbl_category
-        GROUP BY area
-        HAVING area=#{area}
-    </select>
 
     <select id="findAddressList" resultType="com.example.date_scheduling.post.entity.Category">
         SELECT address
