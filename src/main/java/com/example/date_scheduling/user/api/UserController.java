@@ -32,7 +32,7 @@ public class UserController {
     private final UserService userService;
     private final TokenProvider provider;
 
-    @Value("${upload.path}")
+    @Value("${profile.path}")
     private String uploadRootPath;
 
     //회원가입하기
@@ -144,6 +144,35 @@ public class UserController {
         ///해당 유저의 닉네임을 통해서 프로필 사진의 경로를 DB에서 조회
         //ex) /2023/01/07/ㄺㅎㄹ.파일명.확장자
         String profilePath = userService.getProfilePath(username);
+
+        //ex) C:/profile_upload/2023/...
+        String fullPath = uploadRootPath + File.separator + profilePath;
+
+        //해당 경로를 파일 객체로 포장
+        File targetFile = new File(fullPath);
+
+        //혹시 해당 파일이 존재하지 않으면 예외가 발생(FileNotFoundException)
+        if(!targetFile.exists()) return ResponseEntity.notFound().build();
+
+        //파일 데이터를 바이트배열로 포장 (blob 데이터)
+        byte[] rawImageData = FileCopyUtils.copyToByteArray(targetFile);
+
+        //응답 헤더 정보 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(FileUploadUtil.getMediaType(profilePath));
+
+        return ResponseEntity.ok().headers(headers).body(rawImageData);
+    }
+
+    //클라이언트가 프로필사진을 요청할 시 프로필사진을 전달해주는 요청처리
+    @GetMapping(value = "/load-profile/{userid}")
+    public ResponseEntity<?> loadCommentProfile(@PathVariable String userid) throws IOException {
+        log.info("/auth/load-profile/{} GET - 댓글 이미지",userid);
+
+        ///해당 유저의 닉네임을 통해서 프로필 사진의 경로를 DB에서 조회
+        //ex) /2023/01/07/ㄺㅎㄹ.파일명.확장자
+        String profilePath = userService.getCommentProfilePath(userid);
+
 
         //ex) C:/profile_upload/2023/...
         String fullPath = uploadRootPath + File.separator + profilePath;

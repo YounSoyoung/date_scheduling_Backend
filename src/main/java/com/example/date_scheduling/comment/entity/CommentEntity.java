@@ -1,5 +1,6 @@
 package com.example.date_scheduling.comment.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ public class CommentEntity {
     //어떤 유저가 답글을 달았는지 알기위한 유저의 id
     private String userid;
     //댓글을 작성한 시간
+    @JsonFormat(pattern = "yyyy-MM-dd a HH:mm", timezone = "Asia/Seoul")
     private Date regdate;
     //댓글의 내용
     private String content;
