@@ -149,4 +149,10 @@ public class PostService {
         return findAllMyLikesServ(username);
     }
 
+    //게시글 사진 찾기
+    public String getPostImgPath(String postId) {
+       String postImg = repository.findPostImg(postId);
+        log.info("찾은 사진 경로 - {}", postImg);
+        return postImg;
+    }
 }

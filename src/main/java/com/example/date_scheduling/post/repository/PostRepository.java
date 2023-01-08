@@ -42,4 +42,7 @@ public interface PostRepository {
 
     // 게시물 수정 기능
     boolean modify(Post post);
+
+    //게시글의 사진 경로 조회
+    String findPostImg(String postId);
 }

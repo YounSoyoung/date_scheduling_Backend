@@ -15,8 +15,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -234,29 +236,7 @@ public class PostApiController {
         }
     }
 
-//    //리뷰 등록 요청
-//    @PostMapping(value = "/new")
-//    public ResponseEntity<?> create(@AuthenticationPrincipal String username, @RequestBody RequestPostDto requestPostDto){
-//
-//        log.info("/api/posts/new POST request!", requestPostDto);
-//
-//        Post newPost = requestPostDto.getPost();
-//        Category category = requestPostDto.getCategory();
-//
-//        newPost.setUserId(username);
-//        log.info("/api/reviews POST request! - {}", newPost);
-//
-//        try{
-//            FindAllPostDto dto = service.createServ(newPost, category.getAddress());
-//
-//            if(dto == null){
-//                return ResponseEntity.notFound().build();
-//            }
-//            return ResponseEntity.ok().body(dto);
-//        }catch (RuntimeException e){
-//            return ResponseEntity.badRequest().body((e.getMessage()));
-//        }
-//    }
+
 
     // 게시물 수정 요청
     @PutMapping("/mypost/{postId}")
@@ -321,4 +301,35 @@ public class PostApiController {
         }
     }
 
+
+
+    //클라이언트가 사진을 요청할 시 게시글 사진을 전달해주는 요청처리
+    @GetMapping("/load-postimg/{postId}")
+    public ResponseEntity<?> loadPostImg(@PathVariable String postId) throws IOException{
+        log.info("/api/posts/load-postimg/{} GET", postId);
+
+        //해당 게시글의 아이디를 통해 사진의 경로를 DB에서 조회
+        //ex) /2023/01/07/skjeijefjie_파일명.확장자
+        String postImgPath = service.getPostImgPath(postId);
+
+        //ex) E:/upload/2023/01/07/~~~
+        String fullPath = uploadRootPath + File.separator + postImgPath;
+
+        //해당 경로를 파일 객체로 포장
+        File targetFile = new File(fullPath);
+
+        //혹시 해당 파일이 존재하지 않으면 예외가 발생 (FileNotFoundException)
+        if(!targetFile.exists()) return ResponseEntity.notFound().build();
+
+        // 파일 데이터를 바이트배열로 포장(blob 데이터)
+        byte[] rawImageData = FileCopyUtils.copyToByteArray(targetFile); //예외를 메서드 시그니처에 추가
+
+        //응답 헤더 정보 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(FileUploadUtil.getMediaType(postImgPath));
+
+        //클라이언트에 순수 이미지파일 데이터 리턴
+        return ResponseEntity.ok().headers(headers).body(rawImageData);
+
+    }
 }
