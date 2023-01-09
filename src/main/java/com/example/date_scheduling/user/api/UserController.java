@@ -38,7 +38,7 @@ public class UserController {
     //회원가입하기
     @PostMapping("/join")
     public ResponseEntity<?> register(@RequestPart("userInfo") UserRequestDTO dto,
-                                      @RequestPart(value = "profileImg", required = false)MultipartFile profileImg) throws IOException {
+                                      @RequestPart(value = "profileImg", required = false)MultipartFile profileImg){
         try {
             //userRequestDTO를 서비스에 전송하기 위해서 먼저 userEntity로 변환해줘야한다.
 
@@ -79,6 +79,8 @@ public class UserController {
             return ResponseEntity.ok().body(user);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+        }catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
