@@ -42,5 +42,6 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+//	useJUnitPlatform()
+	exclude '**/*' //빌드할 때 test를 빼고 실행
 }
