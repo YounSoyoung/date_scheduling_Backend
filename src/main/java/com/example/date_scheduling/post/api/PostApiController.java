@@ -8,17 +8,27 @@ import com.example.date_scheduling.post.dto.RequestPostDto;
 import com.example.date_scheduling.post.entity.Category;
 import com.example.date_scheduling.post.entity.Post;
 import com.example.date_scheduling.post.service.CategoryService;
+import com.example.date_scheduling.post.service.MyLikeService;
 import com.example.date_scheduling.post.service.PostService;
+import com.example.date_scheduling.util.FileUploadUtil;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@Slf4j  // 로깅을 위해
+@Slf4j  // 로깅을 위해//////////////푸시테스트
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 @CrossOrigin    // 다른 서버의 요청 허용
@@ -26,6 +36,10 @@ public class PostApiController {
 
     private final PostService service;
     private final CategoryService categoryService;
+    private final MyLikeService myLikeService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
 
     //메인페이지에서 보여줄 리뷰 목록과 마이페이지에서 보여줄 리뷰 목록 나누기
     // 게시물 목록 전체 조회 요청
@@ -68,9 +82,11 @@ public class PostApiController {
 
     //리뷰 등록 요청
     @PostMapping(value = "/new")
-    public ResponseEntity<?> create(@AuthenticationPrincipal String username, @RequestBody RequestPostDto requestPostDto){
+    public ResponseEntity<?> create(@AuthenticationPrincipal String username,
+                                    @RequestPart("postInfo") RequestPostDto requestPostDto,
+                                    @RequestPart(value = "postImg", required = false) MultipartFile postImg) throws IOException {
 
-        log.info("/api/posts/new POST request!", requestPostDto);
+
 
         Post newPost = requestPostDto.getPost();
         Category category = requestPostDto.getCategory();
@@ -79,6 +95,37 @@ public class PostApiController {
         log.info("/api/reviews POST request! - {}", newPost);
 
         try{
+            if(postImg!=null){
+                log.info("postImg: {}", postImg.getOriginalFilename());
+
+                //1. 서버에 이미지를 저장 - 이미지를 서버에 업로드
+
+                //1-a. 파일 저장 위치를 지정하여 파일 객체에 포장
+                String originalFilename = postImg.getOriginalFilename();
+
+                //1-a-1. 파일명이 중복되지 않도록 변경
+                String uploadFileName = UUID.randomUUID() + "_" + originalFilename;
+
+                //1-a-2. 업로드 폴더를 날짜별로 생성
+                String newUploadPath = FileUploadUtil.makeUploadDirectory(uploadRootPath);
+
+                File uploadFile = new File(newUploadPath + "/" + uploadFileName);
+
+                //1-b. 파일을 해당 경로에 업로드
+                postImg.transferTo(uploadFile);
+
+
+                //2. 데이터베이스에 이미지 정보를 저장 - 누가 어떤 사진을 올렸는가
+
+                //2-a. newUploadPath에서 rootPath를 제거
+                //ex) new: D:/upload/2023/01/07
+                // root: D:/upload
+                // new - root == /2023/01/07
+                String savePath = newUploadPath.substring(uploadRootPath.length());
+
+                newPost.setImage(savePath + File.separator + uploadFileName);
+            }
+
             FindAllPostDto dto = service.createServ(newPost, category.getAddress());
 
             if(dto == null){
@@ -88,6 +135,7 @@ public class PostApiController {
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body((e.getMessage()));
         }
+
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +159,7 @@ public class PostApiController {
     //지역이랑 주소를 모두 선택한 다음 검색 버튼을 누르면 입력받은 카테고리에 해당하는 리뷰들을 불러온다
     @PostMapping("/search")
     public FindAllPostDto searchReviews(@RequestBody Category category){
-        log.info("/api/posts/search/{}/{} GET request", category);
+        log.info("/api/posts/search/{} GET request", category);
 
         if(category.getArea() == null || category.getAddress() == null){
             log.warn("{area} or {address} cannot be null");
@@ -119,6 +167,19 @@ public class PostApiController {
         }
 
         return service.searchReviewsServ(category.getAddress());
+
+    }
+
+    @PostMapping("/search/{postId}")
+    public FindAllPostDto searchOtherReviews(@RequestBody Category category, @PathVariable String postId){
+        log.info("/api/posts/search/{} GET request", category);
+
+        if(category.getArea() == null || category.getAddress() == null){
+            log.warn("{area} or {address} cannot be null");
+            throw new RuntimeException("{area} or {address} cannot be null!");
+        }
+
+        return service.searchOtherReviewsServ(category.getAddress(), postId);
 
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +207,19 @@ public class PostApiController {
         return service.findAllMyReviewsServ(username);
     }
 
+    // 내가 작성한 게시물 개별 조회 요청
+    @GetMapping("/mypost/{postId}")
+    public ResponseEntity<?> findOneMyPost(@PathVariable String postId, @AuthenticationPrincipal String username) {
+        log.info("/api/posts/mypost/{} GET request!", postId);
+
+        if (postId == null) return ResponseEntity.badRequest().build();
+
+        RequestPostDto postWithCategory = service.findOneMyPostServ(postId, username);
+
+        if (postWithCategory == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().body(postWithCategory);
+    }
+
 
     // 게시물 삭제 요청
     @DeleteMapping("/mypost/{postId}")
@@ -162,22 +236,132 @@ public class PostApiController {
         }
     }
 
+
+
     // 게시물 수정 요청
     @PutMapping("/mypost/{postId}")
-    public ResponseEntity<?> update(@RequestBody Post post, @PathVariable String postId, @AuthenticationPrincipal String username) {
-//        post.setUserId(username);
-        post.setPostId(postId);
-        String nickByPostId = service.findOneServ(postId).getPost().getUserId();
-        if(!nickByPostId.equalsIgnoreCase(username)) return ResponseEntity.badRequest().body(new ErrorDTO("접근권한이 없습니다-username 불일치"));
-        post.setUserId(nickByPostId);
+    public ResponseEntity<?> update(@RequestPart("updateInfo") RequestPostDto requestPostDto,
+                                    @RequestPart(value = "updateImg", required = false) MultipartFile updateImg,
+                                    @PathVariable String postId,
+                                    @AuthenticationPrincipal String username) throws IOException {
 
-        log.info("/api/posts PUT request!", post);
+        String nickByPostId = service.findOneMyPostServ(postId, username).getPost().getUserId();
+        if(!nickByPostId.equalsIgnoreCase(requestPostDto.getPost().getUserId())) return ResponseEntity.badRequest().body(new ErrorDTO("접근권한이 없습니다-username 불일치"));
+
+        Post modifyPost = requestPostDto.getPost();
+        Category modifyCategory = requestPostDto.getCategory();
+
+        log.info("/api/posts PUT request! Post-{} / Category-{}", modifyPost, modifyCategory);
 
         try {
-            FindAllPostDto dtos = service.update(post);
+            if(updateImg!=null){
+                log.info("updateImg: {}", updateImg.getOriginalFilename());
+
+                //1. 서버에 이미지를 저장 - 이미지를 서버에 업로드
+
+                //1-a. 파일 저장 위치를 지정하여 파일 객체에 포장
+                String originalFilename = updateImg.getOriginalFilename();
+
+                //1-a-1. 파일명이 중복되지 않도록 변경
+                String uploadFileName = UUID.randomUUID() + "_" + originalFilename;
+
+                //1-a-2. 업로드 폴더를 날짜별로 생성
+                String newUploadPath = FileUploadUtil.makeUploadDirectory(uploadRootPath);
+
+                File uploadFile = new File(newUploadPath + "/" + uploadFileName);
+
+                //1-b. 파일을 해당 경로에 업로드
+                updateImg.transferTo(uploadFile);
+
+
+                //2. 데이터베이스에 이미지 정보를 저장 - 누가 어떤 사진을 올렸는가
+
+                //2-a. newUploadPath에서 rootPath를 제거
+                //ex) new: D:/upload/2023/01/07
+                // root: D:/upload
+                // new - root == /2023/01/07
+                String savePath = newUploadPath.substring(uploadRootPath.length());
+
+                modifyPost.setImage(savePath + File.separator + uploadFileName);
+            }
+
+            FindAllPostDto dtos = service.update(modifyPost, modifyCategory.getAddress());
             return ResponseEntity.ok().body(dtos);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /////////////////////////////////////////////////
+    // 게시글 좋아요 기능(추가)
+    @PostMapping("/mylike/{postId}")
+    public ResponseEntity<?> addLike(@PathVariable String postId, @AuthenticationPrincipal String username){
+
+        boolean flag = myLikeService.addLikeServ(postId, username);
+        log.info("{} 좋아요 추가 - {}", postId, username);
+        return ResponseEntity.ok().body(flag);
+    }
+
+    //좋아요한 게시글들 조회
+    @GetMapping("/mylike")
+    public FindAllPostDto myLikes(@AuthenticationPrincipal String username){
+        log.info("/api/posts/mylike GET request!");
+
+        return service.findAllMyLikesServ(username);
+    }
+
+    //좋아요 여부 조회
+    @GetMapping("/mylike/{postId}")
+    public ResponseEntity<?> checkLike(@PathVariable String postId, @AuthenticationPrincipal String username){
+        log.info("/api/posts/mylike/{} GET request to check Like!", postId);
+
+        boolean flag = myLikeService.checkLikeServ(postId, username);
+        return ResponseEntity.ok().body(flag);
+
+    }
+
+    //좋아요한 게시글 삭제
+    @DeleteMapping("/mylike/{postId}")
+    public ResponseEntity<?> deleteMyLike(@AuthenticationPrincipal String username, @PathVariable String postId){
+        log.info("/api/posts/mylike/{} DELETE request", postId);
+
+        try {
+            FindAllPostDto dtos = service.deleteMyLikeServ(username, postId);
+            return ResponseEntity.ok().body(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    //클라이언트가 사진을 요청할 시 게시글 사진을 전달해주는 요청처리
+    @GetMapping("/load-postimg/{postId}")
+    public ResponseEntity<?> loadPostImg(@PathVariable String postId) throws IOException{
+        log.info("/api/posts/load-postimg/{} GET", postId);
+
+        //해당 게시글의 아이디를 통해 사진의 경로를 DB에서 조회
+        //ex) /2023/01/07/skjeijefjie_파일명.확장자
+        String postImgPath = service.getPostImgPath(postId);
+
+        //ex) E:/upload/2023/01/07/~~~
+        String fullPath = uploadRootPath + File.separator + postImgPath;
+
+        //해당 경로를 파일 객체로 포장
+        File targetFile = new File(fullPath);
+
+        //혹시 해당 파일이 존재하지 않으면 예외가 발생 (FileNotFoundException)
+        if(!targetFile.exists()) return ResponseEntity.notFound().build();
+
+        // 파일 데이터를 바이트배열로 포장(blob 데이터)
+        byte[] rawImageData = FileCopyUtils.copyToByteArray(targetFile); //예외를 메서드 시그니처에 추가
+
+        //응답 헤더 정보 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(FileUploadUtil.getMediaType(postImgPath));
+
+        //클라이언트에 순수 이미지파일 데이터 리턴
+        return ResponseEntity.ok().headers(headers).body(rawImageData);
+
     }
 }

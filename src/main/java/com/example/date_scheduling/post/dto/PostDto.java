@@ -20,6 +20,7 @@ public class PostDto {
     private String image;
     private Date regDate;
 
+
     // Post에서 PostDto가 필요한 필드를 빼오는 생성자
     public PostDto(Post post) {
         this.userId = post.getUserId();

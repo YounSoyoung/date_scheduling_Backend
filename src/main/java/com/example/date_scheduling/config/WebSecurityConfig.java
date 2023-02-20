@@ -29,7 +29,7 @@ public class WebSecurityConfig {
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests().antMatchers("/", "/auth/**", "/api/posts/search", "/api/posts/search/**", "/api/posts/{postId}", "/api/posts").permitAll()
+                .authorizeRequests().antMatchers("/", "/auth/**", "/api/posts/search", "/api/posts/search/**", "/api/posts/{postId}", "/api/posts", "/api/comments/{postid}", "/api/posts/load-postimg/{postId}" ).permitAll()
                 .anyRequest().authenticated();
 
         //토큰 인증 필터 등록

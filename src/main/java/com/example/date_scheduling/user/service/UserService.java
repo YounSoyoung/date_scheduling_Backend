@@ -50,6 +50,24 @@ public class UserService {
         return user; //로그인 성공시 그 회원의 정보를 보여준다.
     }
 
+    //userentity를 입력받아 정보 바꿔주기
+    public UserEntity changeServ(UserEntity entity){
+        String rawPw = entity.getPassword();
+        entity.setPassword(encoder.encode(rawPw));
+        boolean flag = userRepository.change(entity);
+
+        if(!flag) throw new RuntimeException("잘 변경되지 않았습니다.");
+        return flag? getByEmail(entity.getEmail()) : null;
+
+    }
+
+    //프로필 찾기
+    public String getProfilePath(String username){
+        String profile = userRepository.findProfile(username);
+        log.info("find profile path - {}",profile);
+        return profile;
+    }
+
     //이메일 중복 검증
     public boolean emailDuplicate(String email){
         return userRepository.existByEmail(email);
@@ -61,5 +79,8 @@ public class UserService {
     // 닉네임 중복 검증
     public boolean usernameDuplicate(String username) {return userRepository.existByUsername(username); }
 
+    //댓글 프로필 찾기
+    public String getCommentProfilePath(String username) {
+        return userRepository.findProfile(username);
+    }
 }
-

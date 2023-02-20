@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.date_scheduling.comment.repository.CommentRepository">
+
+    <insert id = "save">
+        insert into tbl_comment
+        (commentid, postid, userid, content)
+        values
+        (#{commentid},#{postid},#{userid},#{content})
+    </insert>
+
+    <delete id = "delete">
+        delete from tbl_comment where commentid = #{commentid}
+    </delete>
+
+    <update id = "modify">
+        update tbl_comment
+        set content = #{content}
+        where commentid = #{commentid}
+    </update>
+
+    <select id = "show" resultType="com.example.date_scheduling.comment.entity.CommentEntity">
+        select commentid, postid, userid, regdate, content
+        from tbl_comment
+        where postid = #{postid}
+    </select>
+
+    <select id = "showOne" resultType="com.example.date_scheduling.comment.entity.CommentEntity">
+        select commentid, postid, userid, regdate, content
+        from tbl_comment
+        where commentid = #{commentid}
+    </select>
+</mapper>
